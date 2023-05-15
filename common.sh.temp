@@ -6,11 +6,15 @@ IMAGE_NAME="ora2pg-dock"
 IMAGE_TAG="20230515"
 
 PG_VERSION=14
-
 ORA2PG_DOCK_HOME=/Users/<me>/Documents/ora2pgdock/
+
+# config
 CONFIG_DIR=$ORA2PG_DOCK_HOME/config
 CONFIG_LOCATION=/config/ora2pg.conf
-OUTPUT_LOCATION=$ORA2PG_DOCK_HOME/data
+
+# output
+OUTPUT_DIR=$ORA2PG_DOCK_HOME/data
+OUTPUT_LOCATION=/data
 
 # current oracle db settings
 ORA_HOST="dbi:Oracle:host=mydb.mydom.fr;sid=SIDNAME;port=1521"

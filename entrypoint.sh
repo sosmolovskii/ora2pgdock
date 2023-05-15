@@ -1,19 +1,18 @@
 #!/usr/bin/env bash
 
-
 function check_env {
     if [ -z "$CONFIG_LOCATION" ]; then
         echo "INFO: No CONFIG_LOCATION variable provided. Using default '/config/ora2pg.conf'"
         export CONFIG_LOCATION=/config/ora2pg.conf
     else
-        echo "INFO: CONFIG_LOCATION variable detected: '$CONFIG_LOCATION'"
+        echo "CONFIG_LOCATION = '$CONFIG_LOCATION'"
     fi
 
     if [ -z "$OUTPUT_LOCATION" ]; then
         echo "INFO: No OUTPUT_LOCATION variable provided. Using default '/data'"
         export OUTPUT_LOCATION=/data
     else
-        echo "INFO: OUTPUT_LOCATION variable detected: '$OUTPUT_LOCATION'"
+        echo "OUTPUT_LOCATION = '$OUTPUT_LOCATION'"
         mkdir -p ${OUTPUT_LOCATION}
     fi
 
@@ -21,16 +20,24 @@ function check_env {
     if [ -z "$ORA_HOST" ]; then
         echo "INFO: No ORA_HOST variable provided. Using value of 'ORACLE_DSN' from '$CONFIG_LOCATION'"
     else
-        echo "INFO: ORA_HOST_FLAG variable detected: '$ORA_HOST'"
-        ORA_HOST_FLAG=" --source $ORA_HOST "
+        echo "ORA_HOST_FLAG = '$ORA_HOST'"
+        ORA_HOST_FLAG="--source $ORA_HOST"
+    fi
+
+    ORA_SCHEMA_FLAG=""
+    if [ -z "$ORA_SCHEMA" ]; then
+        echo "INFO: No ORA_SCHEMA variable provided. Using value of 'SCHEMA' from '$CONFIG_LOCATION'"
+    else
+        echo "ORA_SCHEMA_FLAG = '$ORA_SCHEMA'"
+        ORA_SCHEMA_FLAG="--namespace $ORA_SCHEMA"
     fi
 
     ORA_USER_FLAG=""
     if [ -z "$ORA_USER" ]; then
         echo "INFO: No ORA_USER variable provided. Using value of 'ORACLE_USER' from  '$CONFIG_LOCATION'"
     else
-        echo "INFO: ORA_USER variable detected: '$ORA_USER'"
-        ORA_USER_FLAG=" --user $ORA_USER "
+        echo "ORA_USER = '$ORA_USER'"
+        ORA_USER_FLAG="--user $ORA_USER"
     fi
 
     ORA_PWD_FLAG=""
@@ -38,25 +45,45 @@ function check_env {
     if [ -z "$ORA_PWD" ]; then
         echo "INFO: No ORA_PWD variable provided. Using value of 'ORACLE_PWD' from  '$CONFIG_LOCATION'"
     else
-        echo "INFO: ORA_PWD variable detected: '*******'"
-        ORA_PWD_FLAG=" --password $ORA_PWD "
-        ORA_PWD_FLAG_MASKED=" --password ******* "
+        echo "ORA_PWD = '*******'"
+        ORA_PWD_FLAG="--password $ORA_PWD"
+        ORA_PWD_FLAG_MASKED="--password *******"
     fi
 }
 
+check_env
+ORA_ALL_VAR_4_PRINT="${ORA_HOST_FLAG} ${ORA_SCHEMA_FLAG} ${ORA_USER_FLAG} ${ORA_PWD_FLAG_MASKED}"
+ORA_ALL_VAR="${ORA_HOST_FLAG} ${ORA_SCHEMA_FLAG} ${ORA_USER_FLAG} ${ORA_PWD_FLAG}"
 if [ "$1" = 'ora2pg' ]; then
-
-    check_env
     # Set host name for oracle
-    /bin/bash -c "echo '127.0.1.1 ${HOSTNAME}' >> /etc/hosts"
-    if [ -z "$2" ]; then
-        echo "INFO: no args provided. Using default: '--debug -c $CONFIG_LOCATION --basedir $OUTPUT_LOCATION ${ORA_HOST_FLAG} ${ORA_USER_FLAG}  ${ORA_PWD_FLAG_MASKED} ' "
-        ora2pg --debug -c ${CONFIG_LOCATION} --basedir ${OUTPUT_LOCATION} ${ORA_HOST_FLAG} ${ORA_USER_FLAG}  ${ORA_PWD_FLAG}
-    else
-        echo "INFO: executing: '$@'"
-        exec "$@"
-    fi
-    exit 0
-fi
+    #/bin/bash -c "echo '127.0.1.1 ${HOSTNAME}' >> /etc/hosts"
+    echo "INFO: Start export"
+    echo "ora2pg --debug -c ${CONFIG_LOCATION}"
+    echo "       --basedir ${OUTPUT_LOCATION}"
+    echo "       ${ORA_ALL_VAR_4_PRINT}"
+    echo "       ${@:2}"
+    ora2pg --debug \
+           -c ${CONFIG_LOCATION} \
+           --basedir ${OUTPUT_LOCATION} \
+           ${ORA_ALL_VAR} \
+           ${@:2}
+    bash
 
-exec "$@"
+elif [ "$1" = 'report' ]; then
+    echo "INFO: Start report"
+    echo "ora2pg -t SHOW_REPORT --estimate_cost -c $CONFIG_LOCATION"
+    echo "        --basedir $OUTPUT_LOCATION"
+    echo "       ${ORA_ALL_VAR_4_PRINT}"
+    echo "       ${@:2}"
+    ora2pg -t SHOW_REPORT --estimate_cost \
+           -c ${CONFIG_LOCATION} \
+           --basedir ${OUTPUT_LOCATION} \
+           ${ORA_ALL_VAR} \
+           ${@:2}
+    bash
+
+elif [ "$1" = 'bash' ]; then
+  bash
+else
+  exec "$@"
+fi

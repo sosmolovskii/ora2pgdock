@@ -18,10 +18,12 @@ docker run $( [ ${ORA2PG_RUN_FLAG_INTERACTIVE} = "true" ] && echo "-it" ) \
        -e CONFIG_LOCATION=${CONFIG_LOCATION} \
        -e OUTPUT_LOCATION=${OUTPUT_LOCATION} \
        -e ORA_HOST=${ORA_HOST} \
+       -e ORA_SCHEMA=${ORA_SCHEMA} \
        -e ORA_USER=${ORA_USER} \
        -e ORA_PWD=${ORA_PWD} \
-       -v ${CONFIG_DIR}:/config \
-       -v ${OUTPUT_LOCATION}:/data \
+       -v "${CONFIG_DIR}":/config \
+       -v "${OUTPUT_DIR}":/data \
        -v "$(pwd)":/work \
        -v ${LOCAL_TNS_ADMIN}:/etc/oracle/instantclient/network/admin:Z,ro \
-       "$IMAGE_NAME:$IMAGE_TAG"
+       "$IMAGE_NAME:$IMAGE_TAG" \
+       "$@"
