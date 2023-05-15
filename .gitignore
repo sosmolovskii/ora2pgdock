@@ -1,0 +1,7 @@
+common.sh
+
+### IntelliJ IDEA ###
+.idea
+*.iws
+*.iml
+*.ipr
