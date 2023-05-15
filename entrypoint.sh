@@ -72,7 +72,7 @@ if [ "$1" = 'ora2pg' ]; then
 elif [ "$1" = 'report' ]; then
     echo "INFO: Start report"
     echo "ora2pg -t SHOW_REPORT --estimate_cost -c $CONFIG_LOCATION"
-    echo "        --basedir $OUTPUT_LOCATION"
+    echo "       --basedir $OUTPUT_LOCATION"
     echo "       ${ORA_ALL_VAR_4_PRINT}"
     echo "       ${@:2}"
     ora2pg -t SHOW_REPORT --estimate_cost \
