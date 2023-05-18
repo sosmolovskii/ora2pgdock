@@ -24,12 +24,14 @@ function check_env {
         ORA_HOST_FLAG="--source $ORA_HOST"
     fi
 
+    FILE_NAME="$(date +"%d-%m-%Y")"
     ORA_SCHEMA_FLAG=""
     if [ -z "$ORA_SCHEMA" ]; then
         echo "INFO: No ORA_SCHEMA variable provided. Using value of 'SCHEMA' from '$CONFIG_LOCATION'"
     else
         echo "ORA_SCHEMA_FLAG = '$ORA_SCHEMA'"
         ORA_SCHEMA_FLAG="--namespace $ORA_SCHEMA"
+        FILE_NAME="$ORA_SCHEMA-$(date +"%d-%m-%Y")"
     fi
 
     ORA_USER_FLAG=""
@@ -60,27 +62,27 @@ if [ "$1" = 'ora2pg' ]; then
     echo "INFO: Start export"
     echo "ora2pg --debug -c ${CONFIG_LOCATION}"
     echo "       --basedir ${OUTPUT_LOCATION}"
+    echo "       -o ${FILE_NAME}.sql"
     echo "       ${ORA_ALL_VAR_4_PRINT}"
     echo "       ${@:2}"
     ora2pg --debug \
            -c ${CONFIG_LOCATION} \
            --basedir ${OUTPUT_LOCATION} \
+           -o "${FILE_NAME}.sql" \
            ${ORA_ALL_VAR} \
            ${@:2}
     bash
 
 elif [ "$1" = 'report' ]; then
     echo "INFO: Start report"
-    echo "ora2pg -t SHOW_REPORT --estimate_cost -c $CONFIG_LOCATION"
-    echo "       --basedir $OUTPUT_LOCATION"
+    echo "ora2pg -t SHOW_REPORT --estimate_cost --dump_as_html"
+    echo "       -c $CONFIG_LOCATION"
     echo "       ${ORA_ALL_VAR_4_PRINT}"
-    echo "       ${@:2}"
-    ora2pg -t SHOW_REPORT --estimate_cost \
+    echo "       ${@:2} > ${OUTPUT_LOCATION}/${FILE_NAME}-report.html"
+    ora2pg -t SHOW_REPORT --estimate_cost --dump_as_html \
            -c ${CONFIG_LOCATION} \
-           --basedir ${OUTPUT_LOCATION} \
            ${ORA_ALL_VAR} \
-           ${@:2}
-    bash
+           ${@:2} > "${OUTPUT_LOCATION}/${FILE_NAME}-report.html"
 
 elif [ "$1" = 'bash' ]; then
   bash
